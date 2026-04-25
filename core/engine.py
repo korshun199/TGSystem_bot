@@ -1,29 +1,38 @@
-# core/engine.py
 import yaml
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram import types
+
+class BotNode:
+    def __init__(self, key, text, buttons):
+        self.key = key
+        self.text = text
+        self.buttons = buttons
 
 class BotOrchestrator:
-    def __init__(self, config_path: str):
+    def __init__(self, config_path):
         self.config_path = config_path
-        self.menu_structure = self.load_config()
+        self.nodes = {}
+        self.load_config()
 
     def load_config(self):
         with open(self.config_path, 'r', encoding='utf-8') as f:
-            return yaml.safe_load(f)['menu']
+            config = yaml.safe_load(f)
+            for key, data in config.get('nodes', {}).items():
+                self.nodes[key] = BotNode(key, data['text'], data.get('buttons', []))
 
-    def get_keyboard(self, menu_id: str):
-        builder = InlineKeyboardBuilder()
-        menu_data = self.menu_structure.get(menu_id, {})
+    def get_node(self, node_key):
+        """Метод, который вызвал ошибку — теперь он здесь точно есть"""
+        return self.nodes.get(node_key)
+
+    def get_keyboard(self, node_key):
+        node = self.get_node(node_key)
+        if not node:
+            return None
         
-        for btn in menu_data.get('buttons', []):
-            # Формируем callback_data как "тип_действия:цель:следующее_меню"
-            callback_data = f"{btn['action']}:{btn.get('payload', 'none')}:{btn.get('next_menu', 'none')}"
-            builder.row(InlineKeyboardButton(
-                text=btn['label'], 
-                callback_data=callback_data
-            ))
+        builder = InlineKeyboardBuilder()
+        for btn in node.buttons:
+            builder.row(types.InlineKeyboardButton(
+                text=btn['text'], 
+                callback_data=btn['callback_data'])
+            )
         return builder.as_markup()
-
-    def get_text(self, menu_id: str):
-        return self.menu_structure.get(menu_id, {}).get('text', "Ошибка: Меню не найдено")

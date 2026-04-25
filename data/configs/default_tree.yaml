@@ -1,22 +1,24 @@
-menu:
+nodes:
   start:
-    text: "Добро пожаловать в TGSystem. Выберите действие:"
-    on_enter: "alert:Рада снова тебя видеть, Олег. Система к твоим услугам." # <--- Новая строка!
+    text: "🔔 Рада снова тебя видеть, Олег.\n\nСистема Коршун-Мастер развернута на VPS и готова к работе. Выбирай нужный раздел:"
     buttons:
-      - label: "📊 Статус системы"
-        action: "call_func"
-        payload: "get_system_status"
-        next_menu: "start"
-      - label: "⚙️ Управление"
-        action: "open_menu"
-        next_menu: "settings"
+      - text: "📊 Мониторинг системы"
+        callback_data: "monitoring"
+      - text: "🖥 Управление VPS"
+        callback_data: "vps_manage"
+      - text: "⚙️ Настройки бота"
+        callback_data: "settings"
+      - text: "🆘 Поддержка"
+        callback_data: "support"
+
+  monitoring:
+    text: "📈 Раздел мониторинга пока в разработке, но связь с сервером стабильна."
+    buttons:
+      - text: "⬅️ Назад"
+        callback_data: "start"
 
   settings:
-    text: "Раздел управления. Что настроить?"
+    text: "⚙️ Здесь будут настройки уведомлений и доступа."
     buttons:
-      - label: "📲 Отправить СМС"
-        action: "run_script"
-        payload: "send_sms.py"
-      - label: "🔙 Назад"
-        action: "open_menu"
-        next_menu: "start"
+      - text: "⬅️ Назад"
+        callback_data: "start"

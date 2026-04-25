@@ -1,56 +1,27 @@
-from aiogram import Router, F, types
+import logging
+from aiogram import Router, types, F
 from aiogram.filters import Command
 from core.engine import BotOrchestrator
 
-def setup_router(orchestrator: BotOrchestrator):
-    router = Router()
+router = Router()
 
-    # Обработка команды /start
-    @router.message(Command("start"))
-    async def cmd_start(message: types.Message):
-        text = orchestrator.get_text("start")
+@router.message(Command("start"))
+async def cmd_start(message: types.Message, orchestrator: BotOrchestrator):
+    logging.info(f"DEBUG: Получена команда /start от пользователя {message.from_user.id}")
+    
+    # Получаем стартовую ноду из конфига
+    node = orchestrator.get_node("start")
+    
+    if node:
+        # Генерируем клавиатуру
         kb = orchestrator.get_keyboard("start")
-        await message.answer(text, reply_markup=kb)
+        await message.answer(node.text, reply_markup=kb)
+        logging.info("DEBUG: Ответ отправлен успешно")
+    else:
+        logging.error("DEBUG: Нода 'start' не найдена в конфиге!")
+        await message.answer("Ошибка: Начальное меню не настроено.")
 
-    # Универсальный обработчик всех кнопок
-    @router.callback_query()
-    async def universal_callback_handler(callback: types.CallbackQuery):
-        # Парсим callback_data (действие:данные:следующее_меню)
-        data = callback.data.split(":")
-        action, payload, next_menu = data[0], data[1], data[2]
-
-        if action == "open_menu":
-            # Просто переходим к другому пункту меню из конфига
-            text = orchestrator.get_text(next_menu)
-            kb = orchestrator.get_keyboard(next_menu)
-            await callback.message.edit_text(text, reply_markup=kb)
-        
-        elif action == "call_func":
-            # Здесь будет вызов функций (например, статус системы)
-            # Пока просто уведомление
-            await callback.answer(f"Выполняю функцию: {payload}", show_alert=True)
-            
-        elif action == "run_script":
-            # Здесь будет запуск скриптов из data/scripts
-            await callback.answer(f"Запуск скрипта: {payload}", show_alert=True)
-
-        await callback.answer()
-
-    return router
-
-    @router.message(Command("start"))
-    async def cmd_start(message: types.Message):
-        menu_id = "start"
-        text = orchestrator.get_text(menu_id)
-        kb = orchestrator.get_keyboard(menu_id)
-        
-        # Проверяем наличие действия при входе
-        menu_data = orchestrator.menu_structure.get(menu_id, {})
-        on_enter = menu_data.get('on_enter')
-        
-        if on_enter and on_enter.startswith("alert:"):
-            alert_text = on_enter.replace("alert:", "")
-            # Отправляем всплывающее уведомление (или просто сообщение)
-            await message.answer(f"🔔 {alert_text}")
-
-        await message.answer(text, reply_markup=kb)
+# Хендлер-ловушка для ЛЮБЫХ других сообщений (чтобы понять, почему не работает)
+@router.message()
+async def any_message(message: types.Message):
+    logging.info(f"DEBUG: Поймано необработанное сообщение: {message.text} от ID {message.from_user.id}")
