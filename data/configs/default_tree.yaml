@@ -1,0 +1,22 @@
+# data/configs/default_tree.yaml
+menu:
+  start:
+    text: "Добро пожаловать в TGSystem. Выберите действие:"
+    buttons:
+      - label: "📊 Статус системы"
+        action: "call_func"
+        payload: "get_system_status"
+        next_menu: "start"
+      - label: "⚙️ Управление"
+        action: "open_menu"
+        next_menu: "settings"
+
+  settings:
+    text: "Раздел управления. Что настроить?"
+    buttons:
+      - label: "📲 Отправить СМС"
+        action: "run_script"
+        payload: "send_sms.py"
+      - label: "🔙 Назад"
+        action: "open_menu"
+        next_menu: "start"
