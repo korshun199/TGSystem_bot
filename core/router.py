@@ -37,3 +37,20 @@ def setup_router(orchestrator: BotOrchestrator):
         await callback.answer()
 
     return router
+
+    @router.message(Command("start"))
+    async def cmd_start(message: types.Message):
+        menu_id = "start"
+        text = orchestrator.get_text(menu_id)
+        kb = orchestrator.get_keyboard(menu_id)
+        
+        # Проверяем наличие действия при входе
+        menu_data = orchestrator.menu_structure.get(menu_id, {})
+        on_enter = menu_data.get('on_enter')
+        
+        if on_enter and on_enter.startswith("alert:"):
+            alert_text = on_enter.replace("alert:", "")
+            # Отправляем всплывающее уведомление (или просто сообщение)
+            await message.answer(f"🔔 {alert_text}")
+
+        await message.answer(text, reply_markup=kb)

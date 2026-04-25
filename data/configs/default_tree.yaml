@@ -1,7 +1,7 @@
-# data/configs/default_tree.yaml
 menu:
   start:
     text: "Добро пожаловать в TGSystem. Выберите действие:"
+    on_enter: "alert:Рада снова тебя видеть, Олег. Система к твоим услугам." # <--- Новая строка!
     buttons:
       - label: "📊 Статус системы"
         action: "call_func"

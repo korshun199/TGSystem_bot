@@ -9,3 +9,4 @@ venv/
 logs/
 data/configs/local_config.yaml
 init_project.sh
+dev
